@@ -53,6 +53,7 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
   private func getRegisterInfo(result: @escaping FlutterResult) {
     // 如果 regId 已经存在，直接返回
     if let token = regId {
+      print("----get token success: \(token)")
       result(token)
       return
     }
@@ -65,10 +66,12 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
         result(token)
         timer.invalidate() // 停止重试
       } else {
+        print("----geting token ...")
         self.retryCount += 1
         if self.retryCount > self.maxRetries {
+          print("----geting token error max retries")
           // 超过最大重试次数，认为超时
-          result(nil)
+          result("")
           timer.invalidate() // 停止重试
         }
       }
@@ -79,11 +82,12 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
   public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
     // 将 deviceToken 转换为字符串并保存
     let tokenString = deviceToken.map { String(format: "%02x", $0) }.joined()
-    print("设备令牌: \(tokenString)")
+    print("---get token success : \(tokenString)")
 
     // 保存 deviceToken 到 regId
     regId = tokenString
   }
+    
 
   // 处理接收到的推送通知
   public func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
