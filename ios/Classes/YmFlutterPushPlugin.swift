@@ -10,6 +10,7 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
   private var regIdRetryTimer: Timer?
   private var retryCount: Int = 0
   private let maxRetries: Int = 150 // 30s / 200ms = 150次重试
+  private var eventSink: FlutterEventSink?
 
   // 注册插件
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -68,12 +69,12 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
         result(token)
         timer.invalidate() // 停止重试
       } else {
-        print("----geting token ...")
+        print("----getting token ...")
         self.retryCount += 1
         if self.retryCount > self.maxRetries {
-          print("----geting token error max retries")
+          print("----getting token error max retries")
           // 超过最大重试次数，认为超时
-          result("")
+          result("") // 超时返回空字符串
           timer.invalidate() // 停止重试
         }
       }
@@ -88,22 +89,27 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
 
     // 保存 deviceToken 到 regId
     regId = tokenString
+
+    // 通知 Flutter 设备令牌已注册
+    pushChannel?.invokeMethod("onDeviceToken", arguments: tokenString)
   }
-    
 
   // 处理接收到的推送通知
   public func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
     if let message = userInfo["message"] as? String {
       // 通过 EventChannel 将推送消息发送给 Flutter
       if let eventSink = eventSink {
+        print("---receive message: \(message)")
         eventSink(message) // 使用 eventSink 推送消息
       }
     }
     completionHandler(.newData)
   }
 
-  // EventStream 用于推送消息
-  private var eventSink: FlutterEventSink?
+  // 设备注册失败时回调
+  public func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+    print("---push registration failed: \(error.localizedDescription)")
+  }
 
 }
 
