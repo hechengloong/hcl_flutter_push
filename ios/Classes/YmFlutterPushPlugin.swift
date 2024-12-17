@@ -2,14 +2,11 @@ import Flutter
 import UIKit
 import UserNotifications
 
-public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
+public class YmFlutterPushPlugin: NSObject, FlutterPlugin, UIApplicationDelegate {
 
   private var pushChannel: FlutterMethodChannel?
   private var eventChannel: FlutterEventChannel?
   private var regId: String?
-  private var regIdRetryTimer: Timer?
-  private var retryCount: Int = 0
-  private let maxRetries: Int = 150 // 30s / 200ms = 150次重试
   private var eventSink: FlutterEventSink?
 
   // 注册插件
@@ -22,7 +19,7 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
     let eventChannel = FlutterEventChannel(name: "ym_flutter_push.event", binaryMessenger: registrar.messenger())
     eventChannel.setStreamHandler(instance)
     
-    // 初始化 pushChannel
+    // 初始化 pushChannel 和 eventChannel
     instance.pushChannel = channel
     instance.eventChannel = eventChannel
 
@@ -32,9 +29,7 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
         print("通知权限已授予")
         // 权限授予成功后，再注册推送通知
         DispatchQueue.main.async {
-           print("--------请求token start")
           UIApplication.shared.registerForRemoteNotifications()
-           print("--------请求token end")
         }
       } else {
         print("通知权限被拒绝")
@@ -58,26 +53,9 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
     if let token = regId {
       print("----get token success: \(token)")
       result(token)
-      return
-    }
-
-    // 启动重试逻辑，200ms 重试一次，最多尝试 30s
-    retryCount = 0
-    regIdRetryTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
-      if let token = self.regId {
-        // 成功获取到 regId
-        result(token)
-        timer.invalidate() // 停止重试
-      } else {
-        print("----getting token ...")
-        self.retryCount += 1
-        if self.retryCount > self.maxRetries {
-          print("----getting token error max retries")
-          // 超过最大重试次数，认为超时
-          result("") // 超时返回空字符串
-          timer.invalidate() // 停止重试
-        }
-      }
+    } else {
+      // 如果 regId 不存在，返回空字符串或错误信息
+      result("")
     }
   }
 
@@ -94,35 +72,30 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
     pushChannel?.invokeMethod("onDeviceToken", arguments: tokenString)
   }
 
-  // 处理接收到的推送通知
-  public func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-    if let message = userInfo["message"] as? String {
-      // 通过 EventChannel 将推送消息发送给 Flutter
-      if let eventSink = eventSink {
-        print("---receive message: \(message)")
-        eventSink(message) // 使用 eventSink 推送消息
-      }
-    }
-    completionHandler(.newData)
-  }
-
   // 设备注册失败时回调
   public func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
     print("---push registration failed: \(error.localizedDescription)")
   }
 
+  // 处理接收到的推送通知
+  public func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    if let message = userInfo["message"] as? String {
+      // 通过 EventChannel 将推送消息发送给 Flutter
+      eventSink?(message) // 使用 eventSink 推送消息
+    }
+    completionHandler(.newData)
+  }
 }
 
+// MARK: - FlutterEventStreamHandler
 extension YmFlutterPushPlugin: FlutterStreamHandler {
-  // Start listening to the stream.
-  public func onListen(withArguments arguments: Any?, eventSink sink: @escaping FlutterEventSink) -> FlutterError? {
-    self.eventSink = sink
+  public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+    eventSink = events
     return nil
   }
 
-  // Stop listening to the stream.
   public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    self.eventSink = nil
+    eventSink = nil
     return nil
   }
 }
