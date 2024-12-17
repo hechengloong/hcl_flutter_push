@@ -1,0 +1,79 @@
+group = "com.yuanmipush.ym_flutter_push"
+version = "1.0"
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        mavenCentral()
+        maven { url   'https://developer.huawei.com/repo/' }
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.1.0")
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://developer.huawei.com/repo/' }
+
+    }
+}
+
+apply plugin: "com.android.library"
+
+android {
+    if (project.android.hasProperty("namespace")) {
+        namespace = "com.yuanmipush.ym_flutter_push"
+    }
+
+    compileSdk = 34
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdk = 21
+    }
+
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+    dependencies {
+        testImplementation("junit:junit:4.13.2")
+        testImplementation("org.mockito:mockito-core:5.0.0")
+    }
+
+//    testOptions {
+//        unitTests.all {
+//            testLogging {
+//               events "passed", "skipped", "failed", "standardOut", "standardError"
+//               outputs.upToDateWhen {false}
+//               showStandardStreams = true
+//            }
+//        }
+//    }
+}
+
+dependencies {
+    //zip
+//    implementation zipTree(dir: 'libs', include: ['*.jar','*.aar'])
+
+    implementation zipTree('libs/com.heytap.msp_V3.5.3.aar')
+    implementation zipTree('libs/vpush_clientSDK_v4.0.6.0_506.aar')
+    implementation zipTree('libs/MiPush_SDK_Client_6_0_1-C_3rd.aar')
+
+    implementation 'com.huawei.hms:push:6.12.0.300'
+
+//以下依赖都需要添加
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'commons-codec:commons-codec:1.6'
+    implementation 'androidx.annotation:annotation:1.1.0'
+}
