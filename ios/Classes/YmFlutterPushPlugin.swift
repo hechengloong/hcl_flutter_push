@@ -28,11 +28,9 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
     // 请求推送权限
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
       if granted {
-        print("通知权限已授予")
         // 权限授予成功后，再注册推送通知
-        DispatchQueue.main.async {
           UIApplication.shared.registerForRemoteNotifications()
-        }
+        print("通知权限已授予")
       } else {
         print("通知权限被拒绝")
       }
