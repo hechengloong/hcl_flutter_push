@@ -4,12 +4,10 @@ import UserNotifications
 
 public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCenterDelegate {
 
-  private var pushChannel: FlutterMethodChannel?
-  private var eventChannel: FlutterEventChannel?
   private var regId: String?
   let center: UNUserNotificationCenter
 
-  init() {
+  override init() {
       self.center = UNUserNotificationCenter.current()
   }
     
@@ -19,16 +17,9 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
     let instance = YmFlutterPushPlugin()
     UNUserNotificationCenter.current().delegate = instance
 
-    registrar.addMethodCallDelegate(instance)
+    registrar.addMethodCallDelegate(instance,channel:channel)
     registrar.addApplicationDelegate(instance)
 
-    // 创建 EventChannel，用于推送消息的广播
-    let eventChannel = FlutterEventChannel(name: "ym_flutter_push.event", binaryMessenger: registrar.messenger())
-    eventChannel.setStreamHandler(instance)
-    
-    // 初始化 pushChannel 和 eventChannel
-    instance.pushChannel = channel
-    instance.eventChannel = eventChannel
 
     // 请求推送权限
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
