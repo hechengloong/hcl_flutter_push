@@ -2,26 +2,33 @@ import Flutter
 import UIKit
 import UserNotifications
 
-public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
+public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCenterDelegate {
 
-  // private var pushChannel: FlutterMethodChannel?
-  // private var eventChannel: FlutterEventChannel?
+  private var pushChannel: FlutterMethodChannel?
+  private var eventChannel: FlutterEventChannel?
   private var regId: String?
-  // private var eventSink: FlutterEventSink?
+  let center: UNUserNotificationCenter
 
+  init() {
+      self.center = UNUserNotificationCenter.current()
+  }
+    
   // 注册插件
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "ym_flutter_push", binaryMessenger: registrar.messenger())
     let instance = YmFlutterPushPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
+    UNUserNotificationCenter.current().delegate = instance
 
-    // // 创建 EventChannel，用于推送消息的广播
-    // let eventChannel = FlutterEventChannel(name: "ym_flutter_push.event", binaryMessenger: registrar.messenger())
-    // eventChannel.setStreamHandler(instance)
+    registrar.addMethodCallDelegate(instance)
+    registrar.addApplicationDelegate(instance)
+
+    // 创建 EventChannel，用于推送消息的广播
+    let eventChannel = FlutterEventChannel(name: "ym_flutter_push.event", binaryMessenger: registrar.messenger())
+    eventChannel.setStreamHandler(instance)
     
-    // // 初始化 pushChannel 和 eventChannel
-    // instance.pushChannel = channel
-    // instance.eventChannel = eventChannel
+    // 初始化 pushChannel 和 eventChannel
+    instance.pushChannel = channel
+    instance.eventChannel = eventChannel
 
     // 请求推送权限
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
@@ -52,25 +59,25 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
   // 获取设备的 regId（设备令牌）
   private func getRegisterInfo(result: @escaping FlutterResult) {
     // 如果 regId 已经存在，直接返回
-    print("----get token success: \(regId)")
+    print("----callback token : \(regId)")
     result(regId)
   }
 
-  // 获取设备的推送通知 token
-    public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        let token = deviceToken.map { String(format: "%02x", $0) }.joined()
+   public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenParts = deviceToken.map { data -> String in
+            return String(format: "%02.2hhx", data)
+        }
+        let token = tokenParts.joined()
         print("---------------Device Token: \(token)")
         regId = token
     }
 
-    // 推送点击回调
-    public func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        print("---------------Received Push Notification: \(userInfo)")
-        
-        // 通过 FlutterMethodChannel 将点击事件传递给 Flutter 层
-        // pushChannel?.invokeMethod("onPushNotificationClicked", arguments: userInfo)
-        
-        completionHandler(.newData)
+
+    public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let notification = response.notification
+        print("----------点击通知: \(notification)")
+        completionHandler()
     }
+
 }
 
