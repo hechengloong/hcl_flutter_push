@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import UserNotifications
+import Foundation
 
 public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCenterDelegate {
 
@@ -54,7 +55,16 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
       var map = [String:String]()
       map["regId"] = regId
       map["platform"] = "apple"
-      result(map.description)
+      do {
+          let jsonData = try JSONSerialization.data(withJSONObject: map, options: .prettyPrinted)
+          if let jsonString = String(data: jsonData, encoding: .utf8) {
+              print(jsonString)
+              result(jsonString)
+          }
+      } catch {
+          print("Error converting dictionary to JSON string: \(error)")
+          result("")
+      }
   }
 
    public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
