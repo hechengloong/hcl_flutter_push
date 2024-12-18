@@ -52,15 +52,8 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin {
   // 获取设备的 regId（设备令牌）
   private func getRegisterInfo(result: @escaping FlutterResult) {
     // 如果 regId 已经存在，直接返回
-    print("----get token success: \(token)")
-
-    if let token = regId {
-      print("----get token success: \(token)")
-      result(token)
-    } else {
-      // 如果 regId 不存在，返回空字符串或错误信息
-      result("")
-    }
+    print("----get token success: \(regId)")
+    result(regId)
   }
 
   // 获取设备的推送通知 token
