@@ -37,27 +37,27 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin, UNUserNotificationCen
     // }
   }
 
-  // // 处理方法调用
-  // public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-  //   switch call.method {
-  //   case "getRegisterInfo":
-  //       getRegisterInfo(result: result)
-  //   default:
-  //     result(FlutterMethodNotImplemented)
-  //   }
-  // }
+  // 处理方法调用
+  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    switch call.method {
+    case "getRegisterInfo":
+        getRegisterInfo(result: result)
+    default:
+      result(FlutterMethodNotImplemented)
+    }
+  }
 
-  // // 获取设备的 regId（设备令牌）
-  // private func getRegisterInfo(result: @escaping FlutterResult) {
-  //   // 如果 regId 已经存在，直接返回
-  //   if let token = regId {
-  //     print("----get token success: \(token)")
-  //     result(token)
-  //   } else {
-  //     // 如果 regId 不存在，返回空字符串或错误信息
-  //     result("")
-  //   }
-  // }
+  // 获取设备的 regId（设备令牌）
+  private func getRegisterInfo(result: @escaping FlutterResult) {
+    // 如果 regId 已经存在，直接返回
+    if let token = regId {
+      print("----get token success: \(token)")
+      result("")
+    } else {
+      // 如果 regId 不存在，返回空字符串或错误信息
+      result("")
+    }
+  }
 
   // // 设备成功注册并获取到 deviceToken
   // public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
