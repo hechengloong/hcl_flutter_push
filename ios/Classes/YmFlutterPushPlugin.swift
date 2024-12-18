@@ -7,6 +7,9 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
 
   private var regId: String?
   let center: UNUserNotificationCenter
+  private var pushChannel: FlutterMethodChannel?
+  private var eventChannel: FlutterEventChannel?
+  private var eventSink: FlutterEventSink?
 
   override init() {
       self.center = UNUserNotificationCenter.current()
@@ -21,6 +24,14 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
     registrar.addMethodCallDelegate(instance,channel:channel)
     registrar.addApplicationDelegate(instance)
 
+
+    // 创建 EventChannel，用于推送消息的广播
+    let eventChannel = FlutterEventChannel(name: "ym_flutter_push.event", binaryMessenger: registrar.messenger())
+    eventChannel.setStreamHandler(instance)
+    
+    // 初始化 pushChannel
+    instance.pushChannel = channel
+    instance.eventChannel = eventChannel
 
     // 请求推送权限
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
@@ -80,8 +91,32 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let notification = response.notification
         print("----------点击通知: \(notification)")
+          // 通过 EventChannel 将推送消息发送给 Flutter
+        if let eventSink = eventSink {
+          eventSink([
+            "id": notification.request.identifier,
+            "body": notification.request.content.body,
+            "title": notification.request.content.title,
+            "subtitle": notification.request.content.subtitle,
+            "userInfo": notification.request.content.userInfo
+        ]) // 使用 eventSink 推送消息
+        }
+
         completionHandler()
     }
 
 }
 
+extension YmFlutterPushPlugin: FlutterStreamHandler {
+  // Start listening to the stream.
+  public func onListen(withArguments arguments: Any?, eventSink sink: @escaping FlutterEventSink) -> FlutterError? {
+    self.eventSink = sink
+    return nil
+  }
+
+  // Stop listening to the stream.
+  public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    self.eventSink = nil
+    return nil
+  }
+}
