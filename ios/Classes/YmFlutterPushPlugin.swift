@@ -51,7 +51,10 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
   private func getRegisterInfo(result: @escaping FlutterResult) {
     // 如果 regId 已经存在，直接返回
     print("----callback token : \(regId)")
-    result(regId)
+      var map = [String:String]()
+      map["regId"] = regId
+      map["platform"] = "apple"
+      result(map.description)
   }
 
    public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
