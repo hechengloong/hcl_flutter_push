@@ -87,15 +87,9 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
         //     "payload":  notification.request.content.userInfo["payload"]
         // ])
 
-        if let payload = notification.request.content.userInfo["payload"] as? [String: Any] {
-            channel.invokeMethod("notificationTapped", arguments: [
-                "payload": payload
-            ])
-        } else {
-             channel.invokeMethod("notificationTapped", arguments: [
-                "payload": ""
-            ])
-        }
+        channel.invokeMethod("notificationTapped", arguments: [
+                "payload": notification.request.content.userInfo
+        ])
 
         completionHandler()
     }
