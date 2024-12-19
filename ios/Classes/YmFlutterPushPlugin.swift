@@ -9,7 +9,7 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
   let center: UNUserNotificationCenter
   private var channel: FlutterMethodChannel?
 
-  override init(channel: FlutterMethodChannel) {
+   init(channel: FlutterMethodChannel) {
       self.center = UNUserNotificationCenter.current()
   }
     
