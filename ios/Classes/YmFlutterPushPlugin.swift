@@ -7,7 +7,7 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
 
   private var regId: String?
   let center: UNUserNotificationCenter
-  private var channel: FlutterMethodChannel?
+  private var channel: FlutterMethodChannel
 
    init(channel: FlutterMethodChannel) {
       self.center = UNUserNotificationCenter.current()
