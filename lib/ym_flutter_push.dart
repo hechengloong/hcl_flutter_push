@@ -7,7 +7,7 @@ class YmFlutterPush {
   static final YmFlutterPush instance = YmFlutterPush._internal();
   factory YmFlutterPush() => instance;
 
-  EventChannel eventChannel = const EventChannel('ym_flutter_push.event');
+  EventChannel methodChannel = const EventChannel('ym_flutter_push');
 
   Future<String?> getPlatformVersion() {
     return YmFlutterPushPlatform.instance.getPlatformVersion();

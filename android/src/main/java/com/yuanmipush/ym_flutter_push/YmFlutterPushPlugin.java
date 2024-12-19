@@ -38,9 +38,6 @@ public class YmFlutterPushPlugin implements FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
 
-  //回调event给flutter
-  private EventChannel eventChannel;
-
   private Context context;
 
   @Override
@@ -49,20 +46,6 @@ public class YmFlutterPushPlugin implements FlutterPlugin, MethodCallHandler {
     channel.setMethodCallHandler(this);
 
     context = flutterPluginBinding.getApplicationContext();
-    eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "ym_flutter_push.event");
-
-    // EventChannel 初始化
-    eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
-      @Override
-      public void onListen(Object arguments, EventChannel.EventSink events) {
-        YmPushClient.getInstance().bind( events);
-      }
-
-      @Override
-      public void onCancel(Object arguments) {
-        YmPushClient.getInstance().unBind();
-      }
-    });
 
     //初始化client
     YmPushClient.getInstance().init(context);
@@ -100,7 +83,6 @@ public class YmFlutterPushPlugin implements FlutterPlugin, MethodCallHandler {
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     channel.setMethodCallHandler(null);
-    eventChannel.setStreamHandler(null);
   }
 
 }
