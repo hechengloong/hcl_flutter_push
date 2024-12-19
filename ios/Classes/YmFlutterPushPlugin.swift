@@ -82,13 +82,12 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let notification = response.notification
         print("----------点击通知: \(notification)")
-          // 通过 EventChannel 将推送消息发送给 Flutter
-        // channel.invokeMethod("notificationTapped", arguments: [
-        //     "payload":  notification.request.content.userInfo["payload"]
-        // ])
-
         channel.invokeMethod("notificationTapped", arguments: [
-                "payload": notification.request.content.userInfo
+            "id": notification.request.identifier,
+            "body": notification.request.content.body,
+            "title": notification.request.content.title,
+            "subtitle": notification.request.content.subtitle,
+            "userInfo": notification.request.content.userInfo
         ])
 
         completionHandler()
