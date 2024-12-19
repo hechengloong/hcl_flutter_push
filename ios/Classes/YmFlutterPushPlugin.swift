@@ -45,6 +45,11 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
     switch call.method {
     case "getRegisterInfo":
         getRegisterInfo(result: result)
+        return;
+    case "deleteNotifications": 
+            center.removeDeliveredNotifications(withIdentifiers: call.arguments as! [String])
+        result(true)
+        return;
     default:
       result(FlutterMethodNotImplemented)
     }
