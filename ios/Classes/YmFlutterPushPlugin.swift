@@ -83,13 +83,19 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
         let notification = response.notification
         print("----------点击通知: \(notification)")
           // 通过 EventChannel 将推送消息发送给 Flutter
-        channel.invokeMethod("notificationTapped", arguments: [
-            "id": notification.request.identifier,
-            "body": notification.request.content.body,
-            "title": notification.request.content.title,
-            "subtitle": notification.request.content.subtitle,
-            "userInfo": notification.request.content.userInfo
-        ])
+        // channel.invokeMethod("notificationTapped", arguments: [
+        //     "payload":  notification.request.content.userInfo["payload"]
+        // ])
+
+        if let payload = notification.request.content.userInfo["payload"] as? [String: Any] {
+            channel.invokeMethod("notificationTapped", arguments: [
+                "payload": payload
+            ])
+        } else {
+             channel.invokeMethod("notificationTapped", arguments: [
+                "payload": ""
+            ])
+        }
 
         completionHandler()
     }
