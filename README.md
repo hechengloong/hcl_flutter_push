@@ -10,6 +10,7 @@
 ## 服务端
     go语言编写，都是基于http的
     参考： https://github.com/haomiao33/pushapi
+    使用方法： 类似这种 replace github.com/modood/pushapi => github.com/haomiao33/pushapi v1.3.2-0.20241221015410-7925a943b491
 
 ## 集成方法
 ### 1、库不需要修改，直接使用项目下的example
