@@ -4,7 +4,7 @@
    大家有什么问题可以提issues。
 
 ## 功能
-    1、支持vivo、oppo、华为、小米、苹果
+    1、支持vivo、oppo、华为、小米、apple
     2、目前支持获取到regId
     3、支持服务端发送推送打开应用首页和子页面（可以附加不同的schema或者intent参数）
 

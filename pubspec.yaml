@@ -1,7 +1,8 @@
 name: ym_flutter_push
-description: "A new Flutter plugin project."
+description: "android ios flutter push library"
 version: 0.0.1
-homepage:
+homepage: https://github.com/haomiao33/ym_flutter_push
+repository: https://github.com/haomiao33/ym_flutter_push
 
 environment:
   sdk: ^3.5.3
