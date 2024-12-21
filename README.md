@@ -7,6 +7,9 @@
     1、支持vivo、oppo、华为、小米、apple
     2、目前支持获取到regId
     3、支持服务端发送推送打开应用首页和子页面（可以附加不同的schema或者intent参数）
+## 服务端
+    go语言编写，都是基于http的
+    参考： https://github.com/haomiao33/pushapi
 
 ## 集成方法
 ### 1、库不需要修改，直接使用项目下的example
