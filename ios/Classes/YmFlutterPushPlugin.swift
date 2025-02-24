@@ -38,6 +38,9 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
         print("---------通知权限被拒绝")
       }
     }
+        // 创建 EventChannel 用于发送推送通知事件
+    let eventChannel = FlutterEventChannel(name: "ym_flutter_push_event", binaryMessenger: registrar.messenger())
+    eventChannel.setStreamHandler(instance)
   }
 
   // 处理方法调用
@@ -87,14 +90,30 @@ public class YmFlutterPushPlugin: NSObject, FlutterPlugin,UNUserNotificationCent
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let notification = response.notification
         print("----------点击通知: \(notification)")
-        channel.invokeMethod("notificationTapped", arguments: [
-            "id": notification.request.identifier,
-            "body": notification.request.content.body,
-            "title": notification.request.content.title,
-            "subtitle": notification.request.content.subtitle,
-            "userInfo": notification.request.content.userInfo
-        ])
+       // 发送推送通知的内容到 Flutter 端
+    if let eventSink = self.eventSink {
+      eventSink([
+        "id": notification.request.identifier,
+        "body": notification.request.content.body,
+        "title": notification.request.content.title,
+        "subtitle": notification.request.content.subtitle,
+        "userInfo": notification.request.content.userInfo
+      ])
+    }
 
         completionHandler()
     }
+}
+// MARK: - EventChannel StreamHandler
+extension YmFlutterPushPlugin: FlutterStreamHandler {
+
+  // 监听推送消息
+  public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) {
+    self.eventSink = events
+  }
+
+  // 取消监听
+  public func onCancel(withArguments arguments: Any?) {
+    self.eventSink = nil
+  }
 }

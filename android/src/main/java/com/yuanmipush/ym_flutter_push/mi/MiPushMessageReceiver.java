@@ -24,6 +24,12 @@ public class MiPushMessageReceiver extends PushMessageReceiver {
 //    private String mUserAccount;
 //    private String mStartTime;
 //    private String mEndTime;
+    private EventChannel.EventSink eventSink;
+
+    // 注册 EventChannel 用来发送事件到 Flutter
+    public void setEventSink(EventChannel.EventSink eventSink) {
+        this.eventSink = eventSink;
+    }
     @Override
     public void onReceivePassThroughMessage(Context context, MiPushMessage message) {
         Log.e(YmPushClient.TAG,
@@ -34,12 +40,20 @@ public class MiPushMessageReceiver extends PushMessageReceiver {
     public void onNotificationMessageClicked(Context context, MiPushMessage message) {
         Log.e(YmPushClient.TAG,
                 "--------onNotificationMessageClicked is called. " + message.toString());
+                     // 点击通知时，将消息内容发送给 Flutter
+        if (eventSink != null) {
+            eventSink.success("Notification clicked: " + message.getContent());
+        }
     }
 
     @Override
     public void onNotificationMessageArrived(Context context, MiPushMessage message) {
         Log.e(YmPushClient.TAG,
                 "--------onNotificationMessageArrived is called. " + message.toString());
+                   // 当收到推送消息时，将消息内容发送给 Flutter
+        if (eventSink != null) {
+            eventSink.success("Notification arrived: " + message.getContent());
+        }
     }
 
     @Override

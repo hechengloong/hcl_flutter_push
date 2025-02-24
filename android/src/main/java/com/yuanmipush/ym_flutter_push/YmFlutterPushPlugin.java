@@ -37,6 +37,7 @@ public class YmFlutterPushPlugin implements FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
+  private EventChannel eventChannel; // 添加 EventChannel
 
   private Context context;
 
@@ -45,6 +46,8 @@ public class YmFlutterPushPlugin implements FlutterPlugin, MethodCallHandler {
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "ym_flutter_push");
     channel.setMethodCallHandler(this);
 
+     eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "ym_flutter_push_event");
+        eventChannel.setStreamHandler(this);
     context = flutterPluginBinding.getApplicationContext();
 
     //初始化client
@@ -79,6 +82,29 @@ public class YmFlutterPushPlugin implements FlutterPlugin, MethodCallHandler {
       result.notImplemented();
     }
   }
+ // 当监听 EventChannel 时调用
+    @Override
+    public void onListen(Object arguments, EventSink events) {
+        this.eventSink = events;
+    }
+
+    @Override
+    public void onCancel(Object arguments) {
+        this.eventSink = null;
+    }
+
+    // 推送消息到 Flutter 端
+    public void sendPushEvent(String message) {
+        if (eventSink != null) {
+            eventSink.success(message);
+        }
+    }
+
+    // 当收到推送消息时调用
+    public void onNotificationMessageArrived(Context context, MiPushMessage message) {
+        Log.e("MiPush", "onNotificationMessageArrived: " + message.toString());
+        sendPushEvent("Notification arrived: " + message.getContent());
+    }
 
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
